@@ -11,6 +11,23 @@ public class ObjectReceiver : MonoBehaviour {
 	void Start ()
     {
         GameController.Instance.SetGameObject(switches);
-	}
-	
+        GameController.EnFinal += Reiniciar;
+    }
+
+
+    private void Reiniciar()
+    {
+        Invoke("ReiniciarTodo", 5);
+    }
+
+    private void ReiniciarTodo()
+    {
+        GameController.Instance.ReinicioCompleto();
+    }
+
+    private void OnDestroy()
+    {
+        GameController.EnFinal -= Reiniciar;
+    }
+
 }

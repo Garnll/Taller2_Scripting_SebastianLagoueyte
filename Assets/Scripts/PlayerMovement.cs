@@ -3,15 +3,21 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 
-[RequireComponent(typeof(Rigidbody2D))]
+[RequireComponent(typeof(Rigidbody))]
 public class PlayerMovement : MonoBehaviour {
 
     [SerializeField]
-    private int maxVelocity = 500;
+    private int maxVelocity = 8;
     [SerializeField]
-    private float aceleration = 5;
+    private float aceleration = 0.1f;
+    [SerializeField]
+    private float speedDown = 2;
+    
+    private Rigidbody rb;
+    private Vector3 originalPosition;
 
-    private Rigidbody2D rb2d;
+    private bool sigilo;
+    
 
     public delegate void Activar();
     public event Activar EnUsarBoton;
@@ -19,22 +25,35 @@ public class PlayerMovement : MonoBehaviour {
 	// Use this for initialization
 	void Start ()
     {
-        rb2d = GetComponent<Rigidbody2D>();
-        if (rb2d.gravityScale > 0)
+        rb = GetComponent<Rigidbody>();
+        originalPosition = transform.position;
+        sigilo = false;
+        if (rb.useGravity)
         {
-            rb2d.gravityScale = 0;
+            rb.useGravity = false;
         }
+
+        GameController.EnReinicio += Reiniciar;
 	}
-	
-	// Update is called once per frame
-	void Update ()
+
+    // Update is called once per frame
+    void Update ()
     {
         float h = Input.GetAxis("Horizontal");
         float v = Input.GetAxis("Vertical");
 
+        if (Input.GetKeyDown(KeyCode.LeftShift))
+        {
+            sigilo = true;
+        }
+        if (Input.GetKeyUp(KeyCode.LeftShift))
+        {
+            sigilo = false;
+        }
+
         if (h != 0 || v != 0)
         {
-            Mover(new Vector2(h, v));
+            Mover(new Vector3(h, 0, v));
         }
         else
         {
@@ -47,6 +66,8 @@ public class PlayerMovement : MonoBehaviour {
         }
     }
 
+
+
     private void Usar()
     {
         if (EnUsarBoton != null)
@@ -57,13 +78,32 @@ public class PlayerMovement : MonoBehaviour {
 
     private void Detener()
     {
-        rb2d.velocity = Vector2.Lerp(rb2d.velocity, Vector2.zero, Time.deltaTime / aceleration * 5);
+        rb.velocity = Vector3.Lerp(rb.velocity, Vector3.zero, Time.deltaTime / aceleration * 5);
     }
 
-    private void Mover(Vector2 movimiento)
+    private void Mover(Vector3 movimiento)
     {
         movimiento = movimiento.normalized;
 
-        rb2d.velocity = Vector2.Lerp(rb2d.velocity, movimiento * maxVelocity, Time.deltaTime / aceleration);
+        if (!sigilo)
+        {
+            rb.velocity = Vector3.Lerp(rb.velocity, movimiento * maxVelocity, Time.deltaTime / aceleration);
+        }
+        else
+        {
+            rb.velocity = Vector3.Lerp(rb.velocity, movimiento * (maxVelocity/speedDown), Time.deltaTime / aceleration);
+        }
+    }
+
+
+
+    private void Reiniciar()
+    {
+        transform.position = originalPosition;
+    }
+
+    private void OnDestroy()
+    {
+        GameController.EnReinicio -= Reiniciar;
     }
 }

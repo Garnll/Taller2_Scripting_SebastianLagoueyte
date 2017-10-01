@@ -21,17 +21,33 @@ public class GameController
 
     public delegate void Reiniciar();
     public static event Reiniciar EnDesorden;
+    public static event Reiniciar EnReinicio;
+
+    public delegate void AbrirPuertas();
+    public static event AbrirPuertas EnAbrir;
+    public static event AbrirPuertas EnFinal;
 
     private Stack<SwitchesTrigger> switchesUsados = new Stack<SwitchesTrigger>(5);
     private Stack<SwitchesTrigger> switchesCheckeados = new Stack<SwitchesTrigger>(5);
 
     private GameObject[] switchesDelJuego;
 
-    private int ordenDelCheck = 1;
+    private int ordenDelCheck;
+
+    public bool switchesActivados = false;
 
     public void SetGameObject(GameObject[] switches)
     {
         switchesDelJuego = switches;
+        ordenDelCheck = switchesDelJuego.Length;
+    }
+
+    public int SwitchesDelJuego
+    {
+        get
+        {
+            return switchesDelJuego.Length;
+        }
     }
 
     public void ActivatedSwitch(SwitchesTrigger switchYo)
@@ -53,12 +69,12 @@ public class GameController
 
         if (switchesCheckeados.Peek().MyID() == ordenDelCheck)
         {
-            ordenDelCheck++;
+            ordenDelCheck--;
             return true;
         }
         else
         {
-            ordenDelCheck = 1;
+            ordenDelCheck = switchesDelJuego.Length;
             switchesUsados.Clear();
             switchesCheckeados.Clear();
 
@@ -75,4 +91,30 @@ public class GameController
         }
     }
 
+    public void OpenUp()
+    {
+        EnAbrir();
+    }
+
+    public void Winner()
+    {
+        if (switchesActivados)
+        {
+            EnFinal();
+            Debug.Log("You are winner");
+        }
+        else
+        {
+            Debug.Log("Nice try, go press the switches");
+        }
+    }
+
+    public void ReinicioCompleto()
+    {
+        switchesActivados = false;
+        ordenDelCheck = switchesDelJuego.Length;
+        switchesUsados.Clear();
+        switchesCheckeados.Clear();
+        EnReinicio();
+    }
 }
