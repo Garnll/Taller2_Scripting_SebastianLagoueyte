@@ -7,14 +7,15 @@ using UnityEngine.AI;
 public class EnemyBaseMovement : MonoBehaviour {
 
     [SerializeField]
-    private ColliderTrigger areaOfView = null;
+    protected ColliderTrigger areaOfView = null;
     [SerializeField]
     protected Transform[] targets;
 
-    private NavMeshAgent agent;
+    protected NavMeshAgent agent;
+
+    private Vector3 originPosition;
 
     protected string estadoActual;
-    private int indexMovement;
 
 	// Use this for initialization
 	void Start () {
@@ -30,6 +31,10 @@ public class EnemyBaseMovement : MonoBehaviour {
                 Debug.LogError("No hay ColliderTrigger en un hijo del enemigo");
             }
         }
+        originPosition = transform.position;
+
+        GameController.EnReinicio += Reinicio;
+
         estadoActual = "Cambiar Objetivo";
 	}
 
@@ -99,4 +104,29 @@ public class EnemyBaseMovement : MonoBehaviour {
         agent.SetDestination(other.transform.position);
     }
 
+    protected virtual void AtackPlayer(Collider other)
+    {
+
+    }
+
+    private void Reinicio()
+    {
+        gameObject.SetActive(true);
+        agent.Warp(originPosition);
+    }
+
+    public void Calling(Collider other)
+    {
+        agent.speed = 5;
+        agent.angularSpeed = 200;
+        agent.acceleration = 5;
+
+        agent.SetDestination(other.transform.position);
+    }
+
+
+    private void OnDestroy()
+    {
+        GameController.EnReinicio -= Reinicio;
+    }
 }
