@@ -75,7 +75,7 @@ public class EnemyGuard : EnemyBaseMovement
                 break;
         }
 
-        if ((estadoActual == "Seguir Jugador" || estadoActual == "Atacar Jugador") && agent.remainingDistance < agent.stoppingDistance)
+        if ((estadoActual == "Seguir Jugador" || estadoActual == "Atacar Jugador") && (areaOfView.player.transform.position - transform.position).magnitude < 1)
         {
             estadoActual = "Atacar Jugador";
             AtackPlayer(areaOfView.player);

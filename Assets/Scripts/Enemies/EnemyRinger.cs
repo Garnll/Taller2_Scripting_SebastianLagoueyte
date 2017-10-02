@@ -5,7 +5,7 @@ using UnityEngine;
 public class EnemyRinger : EnemyBaseMovement
 {
     [SerializeField]
-    private float distanciaMaxima = 10;
+    private float distanciaMaxima = 100;
 
     private bool llamando = false;
     private int jugadorVisto = 0;
@@ -100,6 +100,7 @@ public class EnemyRinger : EnemyBaseMovement
 
         int layerMasker = 1 << LayerMask.NameToLayer("Enemy");
 
+        distanciaMaxima = 100;
         Collider[] otherEnemies = Physics.OverlapSphere(transform.position, distanciaMaxima, layerMasker);
 
         foreach (Collider myEnemies in otherEnemies)

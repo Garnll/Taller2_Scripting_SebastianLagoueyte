@@ -98,7 +98,7 @@ public class EnemyBaseMovement : MonoBehaviour {
 
     protected virtual void ChangeRotation()
     {
-        transform.localRotation = Quaternion.Lerp(transform.rotation, originRotation, Time.deltaTime / 0.5f);
+        transform.rotation = Quaternion.Lerp(transform.rotation, originRotation, Time.deltaTime / 0.5f);
     }
 
     protected virtual void Move(Vector3 currentTarget)
@@ -155,6 +155,7 @@ public class EnemyBaseMovement : MonoBehaviour {
     private void Reinicio()
     {
         gameObject.SetActive(true);
+        estadoActual = "Cambiar Objetivo";
         agent.Warp(originPosition);
     }
 

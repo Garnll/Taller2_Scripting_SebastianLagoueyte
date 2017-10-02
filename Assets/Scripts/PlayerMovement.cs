@@ -164,7 +164,6 @@ public class PlayerMovement : MonoBehaviour {
 
     public void RemoveObject()
     {
-        Debug.Log("hum");
         objetoAUsar = null;
         UIController.instance.SetObject("ninguno", "ninguno");
     }

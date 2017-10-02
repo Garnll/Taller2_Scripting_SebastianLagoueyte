@@ -20,7 +20,10 @@ public class EnemyPatrol : EnemyBaseMovement
             {
                 ultimaPosicion = transform.position;
             }
-            estadoActual = "Buscar Jugador";
+            if (estadoActual != "Atacar Jugador")
+            {
+                estadoActual = "Buscar Jugador";
+            }
             tiempo = 0;
         }
         else if (estadoActual == "Buscar Jugador" || estadoActual == "Perder Jugador")
@@ -56,7 +59,7 @@ public class EnemyPatrol : EnemyBaseMovement
             }
         }
 
-        if (agent.remainingDistance <= agent.stoppingDistance && estadoActual != "Buscar Jugador" && estadoActual != "Perder Jugador")
+        if (agent.remainingDistance <= agent.stoppingDistance && estadoActual != "Buscar Jugador" && estadoActual != "Perder Jugador" && estadoActual != "Atacar Jugador")
         {
             estadoActual = "Cambiar Objetivo";
             if (ultimaPosicion != Vector3.zero)
@@ -76,6 +79,10 @@ public class EnemyPatrol : EnemyBaseMovement
                 PlayerSpotted(areaOfView.player);
                 break;
 
+            case "Atacar Jugador":
+                AtackPlayer(areaOfView.player);
+                break;
+
             case "Perder Jugador":
                 SearchForPlayer(playerLastPosition);
                 break;
@@ -93,6 +100,16 @@ public class EnemyPatrol : EnemyBaseMovement
             default:
                 Move(agent.destination);
                 break;
+        }
+
+        if ((estadoActual == "Buscar Jugador" || estadoActual == "Atacar Jugador") && (areaOfView.player.transform.position - transform.position).magnitude < 1)
+        {
+            estadoActual = "Atacar Jugador";
+            AtackPlayer(areaOfView.player);
+        }
+        else if (areaOfView.playerDetected)
+        {
+            estadoActual = "Seguir Jugador";
         }
     }
 
