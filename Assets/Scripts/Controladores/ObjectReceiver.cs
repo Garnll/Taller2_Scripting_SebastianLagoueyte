@@ -12,6 +12,7 @@ public class ObjectReceiver : MonoBehaviour {
     {
         GameController.Instance.SetGameObject(switches);
         GameController.EnFinal += Reiniciar;
+        GameController.EnMuerte += Reiniciar;
     }
 
 

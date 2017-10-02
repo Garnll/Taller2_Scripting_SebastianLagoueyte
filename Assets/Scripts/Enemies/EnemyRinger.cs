@@ -7,31 +7,67 @@ public class EnemyRinger : EnemyBaseMovement
     [SerializeField]
     private float distanciaMaxima = 10;
 
+    private bool llamando = false;
+    private int jugadorVisto = 0;
+
     protected override void Update()
     {
         if (areaOfView.playerDetected)
         {
             estadoActual = "Alertar";
+            tiempo = 0;
+            jugadorVisto++;
+        }
+        else if (estadoActual == "Alertar")
+        {
+            tiempo += Time.deltaTime;
+            if (tiempo >= tiempoDeReposo)
+            {
+                tiempo = 0;
+                estadoActual = "Cambiar Objetivo";
+                jugadorVisto = 0;
+            }
         }
         else
         {
             if (estadoActual != "Volviendo a puesto")
             {
+                jugadorVisto = 0;
                 estadoActual = "Cambiar Objetivo";
             }
         }
+
+        if (agent.remainingDistance <= agent.stoppingDistance && estadoActual == "Alertar")
+        {
+            agent.SetDestination(ChangeTarget(Random.Range(0, targets.Length)));
+        }
+
 
         switch (estadoActual)
         {
             case "Volviendo a puesto":
                 Move(agent.destination);
+
                 break;
 
             case "Alertar":
-                PlayerSpotted(areaOfView.player);
+                agent.speed = 7.8f;
+                agent.angularSpeed = 200;
+                agent.acceleration = 10;
+                if (jugadorVisto <= 1)
+                {
+                    agent.SetDestination(ChangeTarget(Random.Range(0, targets.Length)));
+                }
+                if (!llamando)
+                {
+                    llamando = true;
+                    StartCoroutine(LlamarAOtros());
+                }
                 break;
 
             case "Cambiar Objetivo":
+                llamando = false;
+                StopAllCoroutines();
                 Move(ChangeTarget(0));
                 estadoActual = "Volviendo a puesto";
                 break;
@@ -42,14 +78,23 @@ public class EnemyRinger : EnemyBaseMovement
         }
     }
 
+
+    private IEnumerator LlamarAOtros()
+    {
+        yield return new WaitForSeconds(2);
+        PlayerSpotted(areaOfView.player);
+        llamando = false;
+    }
+
     protected override void PlayerSpotted(Collider player)
     {
-        agent.speed = 7.8f;
-        agent.angularSpeed = 200;
-        agent.acceleration = 10;
+        if (player != null)
+        {
+            playerLastPosition = player.transform.position;
+        }
+
         if (agent.remainingDistance <= agent.stoppingDistance)
         {
-
             agent.SetDestination(ChangeTarget(Random.Range(0, targets.Length)));
         }
 
@@ -59,16 +104,15 @@ public class EnemyRinger : EnemyBaseMovement
 
         foreach (Collider myEnemies in otherEnemies)
         {
-            Debug.Log(myEnemies);
             try
             {
-                myEnemies.GetComponent<EnemyGuard>().Calling(player);
+                myEnemies.GetComponent<EnemyGuard>().Calling(playerLastPosition);
             }
             catch (System.NullReferenceException)
             {
                 try
                 {
-                    myEnemies.GetComponent<EnemyPatrol>().Calling(player);
+                    myEnemies.GetComponent<EnemyPatrol>().Calling(playerLastPosition);
                 }
                 catch
                 {

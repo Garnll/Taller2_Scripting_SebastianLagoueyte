@@ -10,15 +10,23 @@ public class EnemyBaseMovement : MonoBehaviour {
     protected ColliderTrigger areaOfView = null;
     [SerializeField]
     protected Transform[] targets;
+    [SerializeField]
+    protected float tiempoDeReposo = 3;
+    [SerializeField]
+    protected int daño = 25;
 
     protected NavMeshAgent agent;
+    protected float tiempo = 0;
 
     private Vector3 originPosition;
+    private Quaternion originRotation;
+    protected Vector3 playerLastPosition;
 
     protected string estadoActual;
 
-	// Use this for initialization
-	void Start () {
+
+    // Use this for initialization
+    void Start () {
         agent = GetComponent<NavMeshAgent>();
         if (areaOfView == null)
         {
@@ -32,6 +40,7 @@ public class EnemyBaseMovement : MonoBehaviour {
             }
         }
         originPosition = transform.position;
+        originRotation = transform.rotation;
 
         GameController.EnReinicio += Reinicio;
 
@@ -50,11 +59,6 @@ public class EnemyBaseMovement : MonoBehaviour {
             {
                 estadoActual = "Cambiar Objetivo";
             }
-
-            if (agent.remainingDistance < agent.stoppingDistance)
-            {
-
-            }
         }
 
 
@@ -65,7 +69,11 @@ public class EnemyBaseMovement : MonoBehaviour {
                 break;
 
             case "Buscar Jugador":
-                    PlayerSpotted(areaOfView.player);
+                PlayerSpotted(areaOfView.player);
+                break;
+
+            case "Jugador Perdido":
+                SearchForPlayer(playerLastPosition);
                 break;
 
             case "Cambiar Objetivo":
@@ -80,6 +88,19 @@ public class EnemyBaseMovement : MonoBehaviour {
 
     }
 
+    protected void LateUpdate()
+    {
+        if (agent.remainingDistance <= agent.stoppingDistance)
+        {
+            ChangeRotation();
+        }
+    }
+
+    protected virtual void ChangeRotation()
+    {
+        transform.localRotation = Quaternion.Lerp(transform.rotation, originRotation, Time.deltaTime / 0.5f);
+    }
+
     protected virtual void Move(Vector3 currentTarget)
     {
         agent.SetDestination(currentTarget);
@@ -88,11 +109,23 @@ public class EnemyBaseMovement : MonoBehaviour {
     protected virtual Vector3 ChangeTarget(int whichOne)
     {
         agent.speed = 3;
-        agent.angularSpeed = 90;
-        agent.acceleration = 1;
+        agent.angularSpeed = 120;
+        agent.acceleration = 5;
 
         estadoActual = "Moviendo";
         return (targets[whichOne].position);
+    }
+
+
+    protected virtual void SearchForPlayer(Vector3 lastKnownPosition)
+    {
+        agent.SetDestination(lastKnownPosition);
+        int rotar = Random.Range(1, 100);
+        if (rotar == 1)
+        {
+            float angulo = Random.Range(0, 270);
+            transform.Rotate(Vector3.up, angulo * Time.deltaTime);
+        }
     }
 
     protected virtual void PlayerSpotted(Collider other)
@@ -101,13 +134,23 @@ public class EnemyBaseMovement : MonoBehaviour {
         agent.angularSpeed = 200;
         agent.acceleration = 5;
 
+        playerLastPosition = other.transform.position;
+
         agent.SetDestination(other.transform.position);
     }
 
     protected virtual void AtackPlayer(Collider other)
     {
-
+        other.GetComponent<PlayerStats>().RecibirDaño(daño);
     }
+
+
+    public virtual void Morir()
+    {
+        StopAllCoroutines();
+        gameObject.SetActive(false);
+    }
+
 
     private void Reinicio()
     {
@@ -115,15 +158,14 @@ public class EnemyBaseMovement : MonoBehaviour {
         agent.Warp(originPosition);
     }
 
-    public void Calling(Collider other)
+    public void Calling(Vector3 other)
     {
         agent.speed = 5;
         agent.angularSpeed = 200;
         agent.acceleration = 5;
 
-        agent.SetDestination(other.transform.position);
+        agent.SetDestination(other);
     }
-
 
     private void OnDestroy()
     {

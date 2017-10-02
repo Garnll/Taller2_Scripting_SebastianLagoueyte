@@ -55,13 +55,7 @@ public class SwitchChecker : MonoBehaviour {
         if (correcto)
         {
             gm.OpenUp();
-            Debug.Log("You did it");
             //abrir puertas
-        }
-        else
-        {
-            Debug.Log("You did it not");
-            //llamar guardias
         }
     }
 

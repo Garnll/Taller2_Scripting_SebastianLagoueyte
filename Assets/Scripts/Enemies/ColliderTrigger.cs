@@ -14,12 +14,27 @@ public class ColliderTrigger : MonoBehaviour {
     {
         if (other.CompareTag("Player"))
         {
-            playerDetected = true;
-            player = other;
+            if (!other.GetComponent<PlayerMovement>().EnSigilo)
+            {
+                playerDetected = true;
+                player = other;
+            }
         }
     }
 
-    private void OnTriggerExit(Collider other)
+    private void OnTriggerStay(Collider other)
+    {
+        if (other.CompareTag("Player"))
+        {
+            if ((other.transform.position - GetComponentInParent<EnemyBaseMovement>().gameObject.transform.position).magnitude < 2 || !other.GetComponent<PlayerMovement>().EnSigilo)
+            {
+                playerDetected = true;
+                player = other;
+            }
+        }
+    }
+
+        private void OnTriggerExit(Collider other)
     {
         if (other.CompareTag("Player"))
         {
@@ -27,4 +42,5 @@ public class ColliderTrigger : MonoBehaviour {
             player = null;
         }
     }
+
 }

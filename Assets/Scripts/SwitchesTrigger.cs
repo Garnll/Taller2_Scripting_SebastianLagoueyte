@@ -49,6 +49,7 @@ public class SwitchesTrigger : MonoBehaviour {
         if (!activado && encendido)
         {
             activado = true;
+            UIController.instance.SetSwitch(id, Color.yellow);
             GetComponent<Renderer>().material = material[1];
             GameController.Instance.ActivatedSwitch(this);
         }
@@ -59,6 +60,7 @@ public class SwitchesTrigger : MonoBehaviour {
         activado = false;
         encendido = false;
         GetComponent<Renderer>().material = material[0];
+        UIController.instance.SetSwitch(id, Color.white);
     }
 
 
@@ -66,6 +68,7 @@ public class SwitchesTrigger : MonoBehaviour {
     {
         activado = false;
         encendido = false;
+        UIController.instance.SetSwitch(id, Color.white);
         GetComponent<Renderer>().material = material[0];
     }
 

@@ -21,6 +21,17 @@ public class EnemyPatrol : EnemyBaseMovement
                 ultimaPosicion = transform.position;
             }
             estadoActual = "Buscar Jugador";
+            tiempo = 0;
+        }
+        else if (estadoActual == "Buscar Jugador" || estadoActual == "Perder Jugador")
+        {
+            tiempo += Time.deltaTime;
+            estadoActual = "Perder Jugador";
+            if (tiempo >= tiempoDeReposo)
+            {
+                tiempo = 0;
+                estadoActual = "Cambiar Objetivo";
+            }
         }
         else
         {
@@ -45,7 +56,7 @@ public class EnemyPatrol : EnemyBaseMovement
             }
         }
 
-        if (agent.remainingDistance <= agent.stoppingDistance && estadoActual != "Buscar Jugador")
+        if (agent.remainingDistance <= agent.stoppingDistance && estadoActual != "Buscar Jugador" && estadoActual != "Perder Jugador")
         {
             estadoActual = "Cambiar Objetivo";
             if (ultimaPosicion != Vector3.zero)
@@ -54,7 +65,6 @@ public class EnemyPatrol : EnemyBaseMovement
             }
         }
 
-        Debug.Log(estadoActual);
 
         switch (estadoActual)
         {
@@ -64,6 +74,10 @@ public class EnemyPatrol : EnemyBaseMovement
 
             case "Buscar Jugador":
                 PlayerSpotted(areaOfView.player);
+                break;
+
+            case "Perder Jugador":
+                SearchForPlayer(playerLastPosition);
                 break;
 
             case "Cambiar Objetivo":
